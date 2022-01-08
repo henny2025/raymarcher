@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(Raymarcher VERSION 1.0)
+project(raymarcher VERSION 1.0)
+add_subdirectory(src)
+add_subdirectory(assets)
 
-add_executable(Raymarcher main.cpp raymarcher.cpp shader.cpp)
-target_link_libraries(Raymarcher PUBLIC m GL GLEW SDL2)
+
+install(TARGETS raymarcher
+  CONFIGURATIONS Debug Release
+  DESTINATION bin)
+install(DIRECTORY assets/ DESTINATION share/raymarcher FILES_MATCHING PATTERN "*.glsl")
 

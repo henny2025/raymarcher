@@ -1,9 +1,10 @@
 #include "raymarcher.hpp"
 #include "shader.hpp"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_video.h>
 #include <cmath>
 #include <iostream>
+
+#define ASSETS_DIR "/usr/local/share/raymarcher"
 
 raymarcher::raymarcher(int width, int height)
     : window_height(height), window_width(width) {
@@ -41,7 +42,10 @@ raymarcher::raymarcher(int width, int height)
   }
 
   //TODO: figure out how to do smart directory finding
-  shader("../assets/vertex.glsl", "../assets/fragment.glsl");
+  std::string vertex_shader_path(ASSETS_DIR, "/vertex.glsl");
+  std::string fragment_shader_path(ASSETS_DIR, "/fragment.glsl");
+
+  shader(vertex_shader_path, fragment_shader_path);
 }
 
 raymarcher::raymarcher() : raymarcher::raymarcher(600, 800) {}
