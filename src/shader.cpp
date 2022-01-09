@@ -8,21 +8,31 @@ shader::shader() {}
 
 shader::shader(std::string v, std::string f)
     : vertex_shader_file{v}, fragment_shader_file{f} {
+  try {
+    shader::read_files();
+  } catch (std::string &e) {
+    std::cerr << "Caught shader exception: " << e << std::endl;
+  }
+}
+
+shader::~shader() {}
+
+void shader::init() {
   _vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   _fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   _program = glCreateProgram();
   try {
-    shader::read_files();
     shader::source_and_compile();
     shader::attach_and_link();
-  } catch (std::string& e) {
+  } catch (std::string &e) {
     std::cerr << "Caught shader exception: " << e << std::endl;
   }
   glDeleteShader(_vertex_shader);
   glDeleteShader(_fragment_shader);
 }
 
-shader::~shader() {
+void shader::cleanup()
+{
   glDeleteProgram(_program);
 }
 
@@ -30,7 +40,7 @@ void shader::read_files() {
   std::ifstream file(vertex_shader_file);
   std::string line;
   if (file.good()) {
-    while(getline(file, line)) {
+    while (getline(file, line)) {
       vertex_shader_source += line + "\n";
     }
   } else {
@@ -41,7 +51,7 @@ void shader::read_files() {
   // same for fragment shader
   file.open(fragment_shader_file);
   if (file.good()) {
-    while(getline(file, line)) {
+    while (getline(file, line)) {
       fragment_shader_source += line + "\n";
     }
   } else {
@@ -73,7 +83,6 @@ void shader::source_and_compile() {
     glGetShaderInfoLog(_fragment_shader, 512, NULL, error_string);
     throw std::string(error_string);
   }
-
 }
 void shader::attach_and_link() {
   GLint success;
@@ -88,7 +97,4 @@ void shader::attach_and_link() {
   }
 }
 
-void shader::use() {
-
-  glUseProgram(_program);
-}
+void shader::use() { glUseProgram(_program); }

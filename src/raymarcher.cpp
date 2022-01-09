@@ -1,13 +1,16 @@
 #include "raymarcher.hpp"
 #include "shader.hpp"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
 #include <cmath>
 #include <iostream>
 
 #define ASSETS_DIR "/usr/local/share/raymarcher"
 
 raymarcher::raymarcher(int width, int height)
-    : window_height(height), window_width(width) {
+    : _shader("/usr/local/share/raymarcher/vertex.glsl",
+              "/usr/local/share/raymarcher/fragment.glsl"),
+      window_height(height), window_width(width) {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     std::cerr << "Raymarcher Constructor: Failed to initialize SDL"
               << std::endl;
@@ -41,11 +44,7 @@ raymarcher::raymarcher(int width, int height)
               << glewGetErrorString(glew_ok) << std::endl;
   }
 
-  //TODO: figure out how to do smart directory finding
-  std::string vertex_shader_path(ASSETS_DIR, "/vertex.glsl");
-  std::string fragment_shader_path(ASSETS_DIR, "/fragment.glsl");
-
-  shader(vertex_shader_path, fragment_shader_path);
+  _shader.init();
 }
 
 raymarcher::raymarcher() : raymarcher::raymarcher(600, 800) {}
@@ -56,18 +55,20 @@ raymarcher::~raymarcher() {
   glDeleteVertexArrays(1, &_vao);
   glDeleteBuffers(1, &_vbo);
   glDeleteBuffers(1, &_ebo);
+  _shader.cleanup();
 }
 
 void raymarcher::main_loop() {
 
   SDL_Event ev;
+  raymarcher::setup_vao();
 
   while (!should_close) {
     // TODO: just render 10fps to prevent bottlenecking for now
     render_frame();
     SDL_PollEvent(&ev);
     process_event(&ev);
-    SDL_Delay(100);
+    SDL_Delay(10);
   }
 }
 
@@ -83,7 +84,7 @@ void raymarcher::setup_vao() {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(corner_indices), corner_indices,
                GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -92,13 +93,34 @@ void raymarcher::setup_vao() {
 
 void raymarcher::render_frame() {
   _shader.use();
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   glBindVertexArray(_vao);
-  glDrawElements(GL_TRIANGLES, 4, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   SDL_GL_SwapWindow(m_window);
 }
 
 void raymarcher::process_event(SDL_Event *ev) {
-  if (ev->window.type == SDL_WINDOWEVENT_CLOSE) {
-    should_close = true;
+  switch (ev->type) {
+  case SDL_KEYDOWN:
+    if (ev->key.keysym.mod == KMOD_LCTRL && ev->key.keysym.sym == SDLK_q) {
+      should_close = true;
+    }
+    break;
+  case SDL_WINDOWEVENT:
+    switch (ev->window.event) {
+    case SDL_WINDOWEVENT_CLOSE:
+      should_close = true;
+      break;
+    case SDL_WINDOWEVENT_RESIZED:
+      glViewport(0, 0, ev->window.data1, ev->window.data2);
+      break;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
   }
 }

@@ -26,11 +26,16 @@ class raymarcher {
     void render_frame();
 
     // for vbo and ebo
-    float corners[8] = {-1.0, 1.0,
-      1.0, 1.0,
-      1.0, -1.0,
-      -1.0, -1.0};
-    unsigned int corner_indices[4] = {1, 2, 3, 4};
+    float corners[8] = {
+         1,  1,   // top right
+         1, -1,   // bottom right
+         -1, -1,   // bottom left
+        -1,  1,   // top left 
+    };
+    unsigned int corner_indices[6] = {  // note that we start from 0!
+        0, 1, 3,  // first Triangle
+        1, 2, 3   // second Triangle
+    };
 
     void setup_vao();
 };
