@@ -11,6 +11,8 @@ class shader {
     ~shader();
     inline GLuint get_program() {return _program;}
     void use();
+    void init();
+    void cleanup();
   private:
     GLuint _program, _vertex_shader, _fragment_shader;
 
