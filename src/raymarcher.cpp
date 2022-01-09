@@ -116,7 +116,7 @@ void raymarcher::process_event(SDL_Event *ev) {
     case SDL_WINDOWEVENT_RESIZED:
       // resize viewport and set window dimension uniform
       glViewport(0, 0, ev->window.data1, ev->window.data2);
-      glUniform1f(glGetUniformLocation(_shader.get_program(), "WindowHeight"), ev->window.data1);
+      glUniform2f(glGetUniformLocation(_shader.get_program(), "WindowDims"), ev->window.data1, ev->window.data2);
       break;
     default:
       break;
