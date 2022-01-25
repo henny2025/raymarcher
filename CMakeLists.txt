@@ -10,3 +10,4 @@ install(TARGETS raymarcher
   DESTINATION bin)
 install(DIRECTORY assets/ DESTINATION share/raymarcher FILES_MATCHING PATTERN "*.glsl")
 
+
